@@ -4,8 +4,8 @@ def getVelocity(r,v,t):
     return v
 
 def getForce(r,v,t):
-    f0 = (e*v.y*B)/m
-    f1 = -(e*v.x*B)/m
+    f0 = (ELECTRIC_CHARGE*v.y*B_MAGNETIC)/ELECTRIC_MASS
+    f1 = -(ELECTRIC_CHARGE*v.x*B_MAGNETIC)/ELECTRIC_MASS
     return vector(f0, f1, 0)
 
 def calcRungeKutta(r,v,t,h):
@@ -33,63 +33,63 @@ print('* 排出失敗例2：B=1.1*10**25 and E=1.3*10**25 *')
 print('*********************************************')
 print('')
 
-B0 = input('磁場Bの数値を入力してください B=□.□*10^25　　')
-B0 = float(B0)
-E0 = input('電場Eの数値を入力してください E=□.□*10^25　　')
-E0 = float(E0)
+B_init:float = input('磁場Bの数値を入力してください B=□.□*10^25　　')
+B_init = float(B_init)
+E_init:float = input('電場Eの数値を入力してください E=□.□*10^25　　')
+E_init = float(E_init)
 
 print('磁場の強さは')
-print("B=%1.1f*10^25" % B0)
+print("B=%1.1f*10^25" % B_init)
 print('電場の強さは')
-print("E=%1.1f*10^25" % E0)
+print("E=%1.1f*10^25" % E_init)
 
 # 物理定数の設定
-B = B0 * (10 ** 25)  # 磁束密度(T)#
-E = E0 * (10 ** 25)  # 電場(N/C)#
-d_t = 0.005  # 時間の刻み# #h=0.05#
-e = 0.16 * 10**-24  # 正の電荷(C)# #e=0.16*10**-24#
-m = 1.673  # 電荷の質量(yg)# #m=1.673#
-r = vector(0, 2.0, 0)  # 初期条件r(m)# #r=vector(0,2.0,0)#
-v = vector(e * E, 0, 0)  # 初期条件v(m/s)# #v=vector(e*E,0,0)#
+B_MAGNETIC: float = B_init * (10 ** 25)  # 磁束密度(T)
+E_FIELD: float = E_init * (10 ** 25)  # 電場(N/C)
+D_TIME: float = 0.01  # 時間の刻み（s:秒）
+ELECTRIC_CHARGE: float = 0.16 * 10**-24  # 正の電荷の値（C:クーロン）
+ELECTRIC_MASS: float = 1.673  # 電荷の質量（g）
+r = vector(0, 0.1, 0)  # 初期位置(m)
+v = vector(ELECTRIC_CHARGE * E_FIELD, 0, 0)  # 初期初速度(m/s)
+x: float = r.x
+y: float = r.y
+vx: float = v.x
+vy: float = v.y
 
 # ビジュアルオブジェクトの設定
-ball_radius = 0.1  # 荷電子の半径(m)#　#a=0.1#
-d_radius = 20  # Dの半径(m)# #b=20#
-cylinder_radius = 0.5  # 円筒の半径(m)# #c=2.0#  #c>a#
-cylinder_length = 4  # 円筒の長さ(m)# #d=20#
+BALL_RADIUS: float = 0.1  # 荷電子の半径(m)
+D_RADIUS: float = 20  # Dの半径(m)
+CYLINDER_RADIUS: float = 0.5  # 円筒の半径(m)
+CYLINDER_LENGTH: float = 4  # 円筒の長さ(m)
 
-# 背景設定#
-scene = canvas(title='Cyclotron', width=1000, height=1000, autoscale=False, center=vector(0, 0, 0), fov=pi/50)
+# 背景設定
+scene = canvas(title='Cyclotron', width=800, height=800, autoscale=False, center=vector(0, 0, 0), fov=pi/50)
 
-x = r.x
-y = r.y
-vx = v.x
-vy = v.y
-
-# 荷電粒子#
-ball = sphere(pos=vector(x, y, 100), color=color.red, radius=ball_radius)
+# 荷電粒子
+ball = sphere(pos=vector(x, y, 100), color=color.red, radius=BALL_RADIUS)
 ball.pos = vector(x, y, 100)
 ball.trail = curve(color=color.green)
 
-# Dの形状#
-rod = cylinder(pos=vector(0, 0, -5.5), axis=vector(0, 0, 4.9), radius=d_radius)
+# Dの形状
+rod = cylinder(pos=vector(0, 0, -5.5), axis=vector(0, 0, 4.9), radius=D_RADIUS)
 
-# 交流電源#
-rod = cylinder(pos=vector(0, d_radius+1, -5.0), axis=vector(0, 0, 4.9), radius=1)
-mybox = box(pos=vector(0.1, 0, 0.2), length=0.2, height=2 * d_radius, width=0.2, color=vector(5, 5, 0))
-mybox = box(pos=vector(-0.1, 0, 0.2), length=0.2, height=2 * d_radius, width=0.2, color=vector(5, 5, 0))
+# 交流電源
+rod = cylinder(pos=vector(0, D_RADIUS+1, -5.0), axis=vector(0, 0, 4.9), radius=1)
+mybox = box(pos=vector(0.1, 0, 0.2), length=0.2, height=2 * D_RADIUS, width=0.2, color=vector(5, 5, 0))
+mybox = box(pos=vector(-0.1, 0, 0.2), length=0.2, height=2 * D_RADIUS, width=0.2, color=vector(5, 5, 0))
 
-# 電場#
-mybox = box(pos=vector(0, 0, -0.2), length=0.2, height=2*d_radius, width=0.2, color=vector(10, 10, 0))
+# 電場
+mybox = box(pos=vector(0, 0, -0.2), length=0.2, height=2*D_RADIUS, width=0.2, color=vector(10, 10, 0))
 
-# 排出器#
-rod = cylinder(pos=vector(-d_radius, 0, 0), axis=vector(0, cylinder_length, 0), radius=cylinder_radius)
+# 排出器
+rod = cylinder(pos=vector(-D_RADIUS, 0, 0), axis=vector(0, CYLINDER_LENGTH, 0), radius=CYLINDER_RADIUS)
 
-i = 0
+# サイクロトロンの実行処理
+i:int = 0
 while True:
     rate(100)
-    time = i * d_t
-    delta = calcRungeKutta(r, v, time, d_t)
+    time = i * D_TIME
+    delta = calcRungeKutta(r, v, time, D_TIME)
     r += delta[0]
     v += delta[1]
     l = x
@@ -102,23 +102,27 @@ while True:
     ball.trail.append(pos=ball.pos)
     if x*l <= 0 and time > 0:
         if l < x:
-            v.x += e * E
+            v.x += ELECTRIC_CHARGE * E_FIELD
         elif l > x:
-            v.x -= e * E
+            v.x -= ELECTRIC_CHARGE * E_FIELD
         else:
             v.x += 0
-    if l**2 + n**2 > d_radius**2:
-        B = 0
-        E = 0
-        if B == 0 and E == 0 and -d_radius-cylinder_radius+ball_radius < x < -d_radius+cylinder_radius-ball_radius and 0 < y < cylinder_length:
+    if l**2 + n**2 > D_RADIUS**2:
+        B_MAGNETIC = 0
+        E_FIELD = 0
+        if B_MAGNETIC == 0 and E_FIELD == 0 and -D_RADIUS-CYLINDER_RADIUS+BALL_RADIUS < x < -D_RADIUS+CYLINDER_RADIUS-BALL_RADIUS and 0 < y < CYLINDER_LENGTH:
             print('排出中')
-        elif B == 0 and E == 0 and -d_radius-cylinder_radius+ball_radius < x < -d_radius+cylinder_radius-ball_radius and y >= cylinder_length:
+        elif B_MAGNETIC == 0 and E_FIELD == 0 and -D_RADIUS-CYLINDER_RADIUS+BALL_RADIUS < x < -D_RADIUS+CYLINDER_RADIUS-BALL_RADIUS and y >= CYLINDER_LENGTH:
             print('排出成功')
             print('速さ%1.2f(m/s)\t' % fabs(sqrt(v.x**2 + v.y**2)))
             break
         else:
             print('排出失敗')
             print('速さ%1.2f(m/s)\t' % fabs(sqrt(v.x**2 + v.y**2)))
-            break    
+            break
+    if i % 500 == 0:
+        print('速さ%1.2f(m/s)\t' % fabs(sqrt(v.x**2 + v.y**2)))
     i += 1
-
+    
+while True:
+    scene.waitfor('click')
