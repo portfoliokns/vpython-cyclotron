@@ -4,8 +4,8 @@ def getVelocity(r,v,t):
     return v
 
 def getForce(r,v,t):
-    f0 = (ELECTRIC_CHARGE*v.y*B_MAGNETIC)/ELECTRIC_MASS
-    f1 = -(ELECTRIC_CHARGE*v.x*B_MAGNETIC)/ELECTRIC_MASS
+    f0 = (ELECTRIC_CHARGE*v.y*B_magnetic)/ELECTRIC_MASS
+    f1 = -(ELECTRIC_CHARGE*v.x*B_magnetic)/ELECTRIC_MASS
     return vector(f0, f1, 0)
 
 def calcRungeKutta(r,v,t,h):
@@ -21,15 +21,10 @@ def calcRungeKutta(r,v,t,h):
     delta_v = (m1+m4+2*(m2+m3))/6.0
     return [delta_r, delta_v]
 
+def getElectricForce():
+    return ELECTRIC_CHARGE * E_FIELD
+
 # 磁場Bと電場Eの入力
-print('*************number example******************')
-print('* 排出成功例1：B=1.8*10**25 and E=1.8*10**25 *')
-print('* 排出成功例2：B=1.1*10**25 and E=1.1*10**25 *')
-print('* 排出成功例3：B=2.5*10**25 and E=2.5*10**25 *')
-print('* 排出成功例4：B=1.0*10**25 and E=3.0*10**25 *')
-print('* 排出成功例5：B=1.0*10**25 and E=1.0*10**25 *')
-print('* 排出失敗例1：B=0.8*10**25 and E=1.8*10**25 *')
-print('* 排出失敗例2：B=1.1*10**25 and E=1.3*10**25 *')
 print('*********************************************')
 print('')
 
@@ -44,75 +39,97 @@ print('電場の強さは')
 print("E=%1.1f*10^25" % E_init)
 
 # 物理定数の設定
-B_MAGNETIC: float = B_init * (10 ** 25)  # 磁束密度(T)
+B_magnetic: float = B_init * (10 ** 25)  # 磁束密度(T)
 E_FIELD: float = E_init * (10 ** 25)  # 電場(N/C)
-D_TIME: float = 0.01  # 時間の刻み（s:秒）
+D_TIME: float = 0.05  # 時間の刻み（s:秒）
 ELECTRIC_CHARGE: float = 0.16 * 10**-24  # 正の電荷の値（C:クーロン）
 ELECTRIC_MASS: float = 1.673  # 電荷の質量（g）
-r = vector(0, 0.1, 0)  # 初期位置(m)
-v = vector(ELECTRIC_CHARGE * E_FIELD, 0, 0)  # 初期初速度(m/s)
+r = vector(0, 1.0, 0)  # 初期位置(m)
+v = vector(getElectricForce(), 0, 0)  # 初期初速度(m/s)
 x: float = r.x
 y: float = r.y
 vx: float = v.x
 vy: float = v.y
 
-# ビジュアルオブジェクトの設定
-BALL_RADIUS: float = 0.1  # 荷電子の半径(m)
-D_RADIUS: float = 20  # Dの半径(m)
-CYLINDER_RADIUS: float = 0.5  # 円筒の半径(m)
-CYLINDER_LENGTH: float = 4  # 円筒の長さ(m)
-
 # 背景設定
-scene = canvas(title='Cyclotron', width=800, height=800, autoscale=False, center=vector(0, 0, 0), fov=pi/50)
+BACKGROUND_TITLE:str = 'サイクロトロン放射光のイメージ映像'
+BACKGROUND_WIDTH:int = 800
+BACKGROUND_HEIGHT:int = 800
+BACKGROUND_CENTER = vector(0,0,100)
+scene = canvas(title=BACKGROUND_TITLE, width=BACKGROUND_WIDTH, height=BACKGROUND_HEIGHT, autoscale=False, center=BACKGROUND_CENTER, fov=pi/50)
 
-# 荷電粒子
-ball = sphere(pos=vector(x, y, 100), color=color.red, radius=BALL_RADIUS)
+# 荷電粒子オブジェクト
+BALL_RADIUS: float = 0.1
+BALL_COLOR = color.red
+CURVE_COLOR = color.green
+ball = sphere(pos=vector(x, y, 100), color=BALL_COLOR, radius=BALL_RADIUS)
 ball.pos = vector(x, y, 100)
-ball.trail = curve(color=color.green)
+ball.trail = curve(color=CURVE_COLOR)
 
-# Dの形状
-rod = cylinder(pos=vector(0, 0, -5.5), axis=vector(0, 0, 4.9), radius=D_RADIUS)
+# Dの形状オブジェクト
+D_POSITION = vector(0, 0, -5.5)
+D_AXIS = vector(0, 0, 4.9)
+D_RADIUS: float = 20
+rod = cylinder(pos=D_POSITION, axis=D_AXIS, radius=D_RADIUS)
 
-# 交流電源
-rod = cylinder(pos=vector(0, D_RADIUS+1, -5.0), axis=vector(0, 0, 4.9), radius=1)
-mybox = box(pos=vector(0.1, 0, 0.2), length=0.2, height=2 * D_RADIUS, width=0.2, color=vector(5, 5, 0))
-mybox = box(pos=vector(-0.1, 0, 0.2), length=0.2, height=2 * D_RADIUS, width=0.2, color=vector(5, 5, 0))
+# 交流電源オブジェクト
+POWER_POSITION:float = vector(0, D_RADIUS+1, -5.0)
+POWER_AXIS = vector(0, 0, 4.9)
+POWER_RADIUS:float = 1
+rod = cylinder(pos=POWER_POSITION, axis=POWER_AXIS, radius=POWER_RADIUS)
 
-# 電場
-mybox = box(pos=vector(0, 0, -0.2), length=0.2, height=2*D_RADIUS, width=0.2, color=vector(10, 10, 0))
+# 電場オブジェクト
+ELECTRIC_FIELD_POSITION = vector(0, 0, -0.2)
+ELECTRIC_FIELD_LENGTH:float = 0.2
+ELECTRIC_FIELD_HEIGHT:float = 2*D_RADIUS
+ELECTRIC_FIELD_COLOR = vector(10, 10, 0)
+mybox = box(pos=ELECTRIC_FIELD_POSITION, length=ELECTRIC_FIELD_LENGTH, height=ELECTRIC_FIELD_HEIGHT, color=ELECTRIC_FIELD_COLOR)
 
-# 排出器
-rod = cylinder(pos=vector(-D_RADIUS, 0, 0), axis=vector(0, CYLINDER_LENGTH, 0), radius=CYLINDER_RADIUS)
+# 排出器オブジェクト
+DISCHARGE_POSITION = vector(-D_RADIUS, 0, 0)
+DISCHARGE_LENGTH = 10
+DISCHARGE_AXIS = vector(0, DISCHARGE_LENGTH, 0)
+DISCHARGE_RADIUS: float = 2
+rod = cylinder(pos=DISCHARGE_POSITION, axis=DISCHARGE_AXIS, radius=DISCHARGE_RADIUS)
+DISCHARGE_LEFT_X = DISCHARGE_POSITION.x-DISCHARGE_RADIUS+BALL_RADIUS
+DISCHARGE_RIGHT_X = DISCHARGE_POSITION.x+DISCHARGE_RADIUS-BALL_RADIUS
 
 # サイクロトロンの実行処理
 i:int = 0
+time:float
+
 while True:
     rate(100)
     time = i * D_TIME
     delta = calcRungeKutta(r, v, time, D_TIME)
     r += delta[0]
     v += delta[1]
-    l = x
-    n = y
+    xx:float = x
+    yy:float = y
     x = r.x
     y = r.y
     vx = v.x
     vy = v.y
+
+    # 荷電粒子オブジェクトの位置設定
     ball.pos = vector(x, y, 0)
     ball.trail.append(pos=ball.pos)
-    if x*l <= 0 and time > 0:
-        if l < x:
-            v.x += ELECTRIC_CHARGE * E_FIELD
-        elif l > x:
-            v.x -= ELECTRIC_CHARGE * E_FIELD
+
+    # 加速度を与える(y軸を横切ったかを判定)
+    if x*xx <= 0 and time > 0:
+        if xx < x:
+            v.x += getElectricForce()
+        elif xx > x:
+            v.x -= getElectricForce()
         else:
             v.x += 0
-    if l**2 + n**2 > D_RADIUS**2:
-        B_MAGNETIC = 0
-        E_FIELD = 0
-        if B_MAGNETIC == 0 and E_FIELD == 0 and -D_RADIUS-CYLINDER_RADIUS+BALL_RADIUS < x < -D_RADIUS+CYLINDER_RADIUS-BALL_RADIUS and 0 < y < CYLINDER_LENGTH:
+
+    # 場外判定
+    if xx**2 + yy**2 > D_RADIUS**2:
+        B_magnetic = 0
+        if DISCHARGE_LEFT_X < x < DISCHARGE_RIGHT_X and 0 < y < DISCHARGE_LENGTH:
             print('排出中')
-        elif B_MAGNETIC == 0 and E_FIELD == 0 and -D_RADIUS-CYLINDER_RADIUS+BALL_RADIUS < x < -D_RADIUS+CYLINDER_RADIUS-BALL_RADIUS and y >= CYLINDER_LENGTH:
+        elif DISCHARGE_LEFT_X < x < DISCHARGE_RIGHT_X and y >= DISCHARGE_LENGTH:
             print('排出成功')
             print('速さ%1.2f(m/s)\t' % fabs(sqrt(v.x**2 + v.y**2)))
             break
@@ -120,6 +137,8 @@ while True:
             print('排出失敗')
             print('速さ%1.2f(m/s)\t' % fabs(sqrt(v.x**2 + v.y**2)))
             break
+
+    # ターミナル上へ速さを出力
     if i % 500 == 0:
         print('速さ%1.2f(m/s)\t' % fabs(sqrt(v.x**2 + v.y**2)))
     i += 1
